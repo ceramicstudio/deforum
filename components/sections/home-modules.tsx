@@ -4,11 +4,11 @@ import { useEffect, useState } from "react";
 import { Profile } from "@/types";
 import { MediaRenderer } from "@thirdweb-dev/react";
 import { Oval } from "react-loader-spinner";
-import { useAccount } from "wagmi";
 
 import { env } from "@/env.mjs";
 import { Button } from "@/components/ui/button";
 import MaxWidthWrapper from "@/components/shared/max-width-wrapper";
+import { useSolanaWallet } from "@/app/context/WalletContext";
 import { useODB } from "@/app/context/OrbisContext";
 
 const PROFILE_ID = env.NEXT_PUBLIC_PROFILE_ID ?? "";
@@ -16,9 +16,8 @@ const CONTEXT_ID = env.NEXT_PUBLIC_CONTEXT_ID ?? "";
 
 export function HomeModules() {
   const [profile, setProfile] = useState<Profile | undefined>(undefined);
-  const [connected, setConnected] = useState<boolean | null>(null);
   const { orbis } = useODB();
-  const { address, isConnecting, isConnected } = useAccount();
+  const { connected, publicKey, } = useSolanaWallet();
 
   const getProfile = async (): Promise<void> => {
     try {
@@ -49,11 +48,10 @@ export function HomeModules() {
       }
     });
     void getProfile();
-    if (!isConnected) {
-      setConnected(false);
+    if (!connected) {
       setProfile(undefined);
     }
-  }, [address, isConnected]);
+  }, [connected, publicKey]);
 
   return (
     <section className="flex flex-col items-center pt-12 text-center md:col-span-1 lg:col-span-1">
@@ -87,11 +85,11 @@ export function HomeModules() {
                     Welcome back,{" "}
                     <span className="text-pink-500">{profile.username}</span>
                   </p>
-                ) : !profile && isConnected ? (
+                ) : !profile && connected ? (
                   <p className="mt-4 text-left text-2xl font-semibold leading-6">
                     Welcome! Please set up your profile
                   </p>
-                ) : isConnecting ? (
+                ) : connected ? (
                   <div className="w-full items-center justify-center">
                     <Oval
                       visible={true}
@@ -112,7 +110,7 @@ export function HomeModules() {
                   <div className="mt-4 text-left text-sm text-muted-foreground">
                     Create a new post or edit your profile
                   </div>
-                ) : !profile && isConnected ? (
+                ) : !profile && connected ? (
                   <div className="mt-4 text-left text-sm text-muted-foreground">
                     Set up a profile in order to create posts and comments
                   </div>
@@ -130,7 +128,7 @@ export function HomeModules() {
                   Create a Post
                 </Button>
               )}
-              {isConnected && (
+              {connected && (
                 <Button
                   variant={"outline"}
                   rounded="full"

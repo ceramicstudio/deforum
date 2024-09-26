@@ -14,7 +14,6 @@ interface NavBarProps {
 }
 
 export function NavBar({ scroll = false }: NavBarProps) {
-
   const selectedLayout = useSelectedLayoutSegment();
 
 
@@ -45,12 +44,12 @@ export function NavBar({ scroll = false }: NavBarProps) {
         <div className="flex items-center space-x-3">
 
         <ConnectButton
-                key="connect"
-                showBalance={{
-                  smallScreen: false,
-                  largeScreen: false,
-                }}
-              />
+          key="connect"
+          showBalance={{
+            smallScreen: false,
+            largeScreen: false,
+          }}
+        />
         </div>
       </MaxWidthWrapper>
     </header>

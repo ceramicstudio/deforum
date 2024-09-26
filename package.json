@@ -18,6 +18,7 @@
     "@thirdweb-dev/sdk": "^4.0.99",
     "@useorbis/db-sdk": "0.0.33-alpha",
     "lucide-react": "^0.381.0",
+    "@solana/web3.js": "^1.95.3",
     "next-auth": "^4",
     "react-loader-spinner": "^6.1.6",
     "@radix-ui/react-dropdown-menu": "^2.1.1",

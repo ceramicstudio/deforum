@@ -6,8 +6,7 @@ import Link from "next/link";
 import { Post, Profile } from "@/types";
 import { MediaRenderer, useStorageUpload } from "@thirdweb-dev/react";
 import TextareaAutosize from "react-textarea-autosize";
-import { useAccount } from "wagmi";
-
+import { useSolanaWallet } from "@/app/context/WalletContext";
 import { env } from "@/env.mjs";
 import { Button } from "@/components/ui/button";
 import MaxWidthWrapper from "@/components/shared/max-width-wrapper";
@@ -25,7 +24,7 @@ export function PostModules() {
   const [post, setPost] = useState<Post | undefined>(undefined);
   const [profile, setProfile] = useState<Profile | undefined>(undefined);
   const { orbis } = useODB();
-  const { address } = useAccount();
+  const { connected, publicKey, connectWallet, disconnectWallet } = useSolanaWallet();
 
   const uploadToIpfs = async () => {
     const uploadUrl = await upload({
@@ -103,10 +102,10 @@ export function PostModules() {
   };
 
   useEffect(() => {
-    if (address) {
+    if (publicKey) {
       void getProfile();
     }
-  }, [address]);
+  }, [connected, publicKey]);
 
   return (
     <section className="flex flex-col items-center pb-6 text-center">

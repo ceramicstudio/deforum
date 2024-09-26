@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { MediaRenderer, useStorageUpload } from "@thirdweb-dev/react";
 import TextareaAutosize from "react-textarea-autosize";
-import { useAccount } from "wagmi";
+import { useSolanaWallet } from "@/app/context/WalletContext";
 import { env } from "@/env.mjs";
 import { type Profile } from "@/types/index";
 import { Button } from "@/components/ui/button";
@@ -21,7 +21,7 @@ export function ProfileModules() {
   const [file, setFile] = useState<File | undefined>(undefined);
   const [profile, setProfile] = useState<Profile | undefined>(undefined);
   const { orbis } = useODB();
-  const { address } = useAccount();
+  const { connected, publicKey, connectWallet, disconnectWallet } = useSolanaWallet();
   const { mutateAsync: upload } = useStorageUpload();
 
   const uploadToIpfs = async () => {
@@ -101,10 +101,10 @@ export function ProfileModules() {
   };
 
   useEffect(() => {
-    if (address) {
+    if (publicKey) {
       void getProfile();
     }
-  }, [address]);
+  }, [publicKey, connected]);
 
   return (
     <section className="flex flex-col items-center pb-6 text-center">

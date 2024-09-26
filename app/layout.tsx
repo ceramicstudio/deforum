@@ -10,7 +10,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { TailwindIndicator } from "@/components/tailwind-indicator";
 import { env } from "@/env.mjs";
 import { ODB } from "./context/OrbisContext";
-import { WalletProvider } from "./context/WalletContext";
+import { SolanaWalletProvider } from "./context/WalletContext";
 import { ThirdwebProvider } from "@thirdweb-dev/react";
 
 interface RootLayoutProps {
@@ -41,14 +41,14 @@ export default function RootLayout({ children }: RootLayoutProps) {
             disableTransitionOnChange
           >
             <QueryClientProvider client={queryClient}>
-              <WalletProvider>
+              <SolanaWalletProvider>
                 <ODB>
                 <ThirdwebProvider activeChain="ethereum" clientId={env.NEXT_PUBLIC_THIRDWEB_ID}>
                {children}
                   </ThirdwebProvider>
                 </ODB>
                
-              </WalletProvider>
+              </SolanaWalletProvider>
             </QueryClientProvider>
             <Toaster richColors closeButton />
             <TailwindIndicator />
