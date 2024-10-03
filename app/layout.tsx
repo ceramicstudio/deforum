@@ -9,7 +9,6 @@ import { cn } from "@/lib/utils";
 import { Toaster } from "@/components/ui/sonner";
 import { TailwindIndicator } from "@/components/tailwind-indicator";
 import { env } from "@/env.mjs";
-import { ODB } from "./context/OrbisContext";
 import { WalletProvider } from "./context/WalletContext";
 import { ThirdwebProvider } from "@thirdweb-dev/react";
 
@@ -42,14 +41,12 @@ export default function RootLayout({ children }: RootLayoutProps) {
         >
           <QueryClientProvider client={queryClient}>
             <WalletProvider>
-              <ODB>
                 <ThirdwebProvider
                   activeChain="ethereum"
                   clientId={env.NEXT_PUBLIC_THIRDWEB_ID}
                 >
                   {children}
                 </ThirdwebProvider>
-              </ODB>
             </WalletProvider>
           </QueryClientProvider>
           <Toaster richColors closeButton />

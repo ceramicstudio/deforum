@@ -9,7 +9,7 @@ import { env } from "@/env.mjs";
 import { type Profile } from "@/types/index";
 import { Button } from "@/components/ui/button";
 import MaxWidthWrapper from "@/components/shared/max-width-wrapper";
-import { useODB } from "@/app/context/OrbisContext";
+import { useCeramicSession } from "../../services/session";
 
 const PROFILE_ID = env.NEXT_PUBLIC_PROFILE_ID ?? "";
 const CONTEXT_ID = env.NEXT_PUBLIC_CONTEXT_ID ?? "";
@@ -20,7 +20,7 @@ export function ProfileModules() {
   const [username, setUsername] = useState<string | undefined>(undefined);
   const [file, setFile] = useState<File | undefined>(undefined);
   const [profile, setProfile] = useState<Profile | undefined>(undefined);
-  const { orbis } = useODB();
+  const {session, orbis} = useCeramicSession()
   const { address } = useAccount();
   const { mutateAsync: upload } = useStorageUpload();
 

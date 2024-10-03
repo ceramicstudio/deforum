@@ -15,7 +15,7 @@ import Link from "next/link";
 import { env } from "@/env.mjs";
 import { formatDate } from "@/lib/utils";
 import MaxWidthWrapper from "@/components/shared/max-width-wrapper";
-import { useODB } from "@/app/context/OrbisContext";
+import { useCeramicSession } from "../../../../../services/session";
 
 const CONTEXT_ID = env.NEXT_PUBLIC_CONTEXT_ID ?? "";
 const COMMENT_ID = env.NEXT_PUBLIC_COMMENT_ID ?? "";
@@ -28,7 +28,7 @@ export default function PostPage({
   };
 }) {
   const [message, setMessage] = useState<Post | undefined>(undefined);
-  const { orbis } = useODB();
+  const {session, orbis} = useCeramicSession()
   const { mutateAsync: upload } = useStorageUpload();
   const [poststream, setPostStream] = useState<string | undefined>(undefined);
   const [comment, setComment] = useState<string | undefined>(undefined);

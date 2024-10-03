@@ -1,56 +1,19 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Profile } from "@/types";
+import { useMemo } from "react";
+import { DisplayWhen } from "@/components/display-when";
 import { MediaRenderer } from "@thirdweb-dev/react";
 import { Oval } from "react-loader-spinner";
-import { useAccount } from "wagmi";
-import { env } from "@/env.mjs";
 import { Button } from "@/components/ui/button";
 import MaxWidthWrapper from "@/components/shared/max-width-wrapper";
-import { useODB } from "@/app/context/OrbisContext";
+import { useCeramicSession } from "../../services/session";
+import  { HomeModuleState, useHomeModuleState } from "./home-modules.state";
+import { useComputed, useSignals } from "@preact/signals-react/runtime";
 
-const PROFILE_ID = env.NEXT_PUBLIC_PROFILE_ID ?? "";
-const CONTEXT_ID = env.NEXT_PUBLIC_CONTEXT_ID ?? "";
-
-export function HomeModules() {
-  const [profile, setProfile] = useState<Profile | undefined>(undefined);
-  const { orbis } = useODB();
-  const { address, isConnecting, isConnected } = useAccount();
-
-  const getProfile = async (): Promise<void> => {
-    try {
-      const user = await orbis.getConnectedUser();
-      if (user) {
-        const profile = orbis
-          .select("name", "username", "profile_imageid", "description")
-          .from(PROFILE_ID)
-          .where({ controller: user.user.did.toLowerCase() })
-          .context(CONTEXT_ID);
-        const profileResult = await profile.run();
-        if (profileResult.rows.length) {
-          setProfile(profileResult.rows[0] as Profile);
-        }
-      }
-    } catch (error) {
-      console.error(error);
-      return undefined;
-    }
-  };
-
-  useEffect(() => {
-    window.addEventListener("loaded", function () {
-      try {
-        void getProfile();
-      } catch (error) {
-        console.log(error);
-      }
-    });
-    void getProfile();
-    if (!isConnected) {
-      setProfile(undefined);
-    }
-  }, [address, isConnected]);
+export function HomeModules(props: { stateFactory: () => HomeModuleState }) {
+  useSignals();
+  const { session, stage, orbis } = useCeramicSession();
+  const state = useHomeModuleState( session.didSession, orbis)
 
   return (
     <section className="flex flex-col items-center pt-12 text-center md:col-span-1 lg:col-span-1">
@@ -67,67 +30,87 @@ export function HomeModules() {
               <div className="flex flex-col">
                 <div className="flex flex-row">
                   <div className="flex items-end">
-                    {profile && (
+                    <DisplayWhen
+                      isTrue={
+                        state.profile !== undefined &&
+                       state.profile.profile_imageid !== undefined
+                      }
+                    >
                       <div className="flex text-left text-3xl font-semibold leading-6">
                         <MediaRenderer
-                          src={profile.profile_imageid}
+                          src={state.profile?.profile_imageid}
                           width="4rem"
                           height="4rem"
                           className="rounded-full"
                         />
                       </div>
-                    )}
+                    </DisplayWhen>
                   </div>
                 </div>
-                {profile ? (
-                  <p className="mt-4 text-left text-2xl font-semibold leading-6">
-                    Welcome back,{" "}
-                    <span className="text-pink-500">{profile.username}</span>
-                  </p>
-                ) : !profile && isConnected ? (
-                  <p className="mt-4 text-left text-2xl font-semibold leading-6">
-                    Welcome! Please set up your profile
-                  </p>
-                ) : isConnecting ? (
-                  <div className="w-full items-center justify-center">
-                    <Oval
-                      visible={true}
-                      height="80"
-                      width="80"
-                      color="#4fa94d"
-                      ariaLabel="oval-loading"
-                      wrapperStyle={{}}
-                      wrapperClass=""
-                    />
-                  </div>
-                ) : (
+                <DisplayWhen isTrue={session.isLoggedIn}>
+                  <DisplayWhen
+                    isTrue={
+                      state.profile !== undefined &&
+                      state.profile.username !== undefined
+                    }
+                  >
+                    <p className="mt-4 text-left text-2xl font-semibold leading-6">
+                      Welcome back,{" "}
+                      <span className="text-pink-500">
+                        {state.profile?.username}
+                      </span>
+                    </p>
+                  </DisplayWhen>
+
+                  <DisplayWhen isTrue={state.profile == undefined}>
+                    <p className="mt-4 text-left text-2xl font-semibold leading-6">
+                      Welcome! Please set up your profile
+                    </p>
+                  </DisplayWhen>
+                  <DisplayWhen isTrue={stage == 0}>
+                    <div className="w-full items-center justify-center">
+                      <Oval
+                        visible={true}
+                        height="80"
+                        width="80"
+                        color="#4fa94d"
+                        ariaLabel="oval-loading"
+                        wrapperStyle={{}}
+                        wrapperClass=""
+                      />
+                    </div>
+                  </DisplayWhen>
+                </DisplayWhen>
+                <DisplayWhen isTrue={session.isLoggedOut}>
                   <p className="mt-4 text-left text-2xl font-semibold leading-6">
                     Welcome! Please connect your wallet
                   </p>
-                )}
-                {profile ? (
-                  <div className="mt-4 text-left text-sm text-muted-foreground">
-                    Create a new post or edit your profile
-                  </div>
-                ) : !profile && isConnected ? (
-                  <div className="mt-4 text-left text-sm text-muted-foreground">
-                    Set up a profile in order to create posts and comments
-                  </div>
-                ) : null}
+                </DisplayWhen>
+                <DisplayWhen isTrue={session.isLoggedIn}>
+                  <DisplayWhen isTrue={state.profile !== undefined}>
+                    <div className="mt-4 text-left text-sm text-muted-foreground">
+                      Create a new post or edit your profile
+                    </div>
+                  </DisplayWhen>
+                  <DisplayWhen isTrue={state.profile == undefined}>
+                    <div className="mt-4 text-left text-sm text-muted-foreground">
+                      Set up a profile in order to create posts and comments
+                    </div>
+                  </DisplayWhen>
+                </DisplayWhen>
               </div>
             </div>
-
             <div className="flex h-full flex-col justify-between gap-4 p-6">
-              {profile && (
-                <Button
-                  variant={"default"}
-                  rounded="full"
-                  onClick={() => (window.location.href = "/post")}
-                >
-                  Create a Post
-                </Button>
-              )}
-              {isConnected && (
+              <DisplayWhen isTrue={session.isLoggedIn}>
+                <DisplayWhen isTrue={state.profile !== undefined}>
+                  <Button
+                    variant={"default"}
+                    rounded="full"
+                    onClick={() => (window.location.href = "/post")}
+                  >
+                    Create a Post
+                  </Button>
+                </DisplayWhen>
                 <Button
                   variant={"outline"}
                   rounded="full"
@@ -135,7 +118,7 @@ export function HomeModules() {
                 >
                   Edit Profile
                 </Button>
-              )}
+              </DisplayWhen>
             </div>
           </div>
         </div>

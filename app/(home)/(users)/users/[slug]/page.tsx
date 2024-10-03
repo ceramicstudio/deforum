@@ -10,7 +10,7 @@ import Link from "next/link";
 
 import { env } from "@/env.mjs";
 import MaxWidthWrapper from "@/components/shared/max-width-wrapper";
-import { useODB } from "@/app/context/OrbisContext";
+import { useCeramicSession } from "../../../../../services/session";
 
 export default function PostPage({
   params,
@@ -20,7 +20,7 @@ export default function PostPage({
   };
 }) {
   const [profile, setProfile] = useState<Profile | undefined>(undefined);
-  const { orbis } = useODB();
+  const {session, orbis} = useCeramicSession()
 
   const getProfile = async (stream_id: string): Promise<void> => {
     try {
