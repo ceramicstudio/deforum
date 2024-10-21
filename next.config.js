@@ -10,6 +10,7 @@ const nextConfig = {
         fs: false,
       };
     }
+    config.externals.push("pino-pretty", "encoding");
     return config;
   },
   images: {
@@ -30,4 +31,4 @@ const nextConfig = {
   },
 };
 
-export default nextConfig
+export default nextConfig;
