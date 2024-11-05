@@ -4,15 +4,13 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { type Post } from "@/types";
 import { MediaRenderer } from "@thirdweb-dev/react";
-import { useAccount, useAccountEffect } from "wagmi";
+import { useAccountEffect } from "wagmi";
 import { formatDate } from "@/lib/utils";
 import { env } from "@/env.mjs";
 import { Button } from "@/components/ui/button";
 import { Icons } from "@/components/shared/icons";
 import MaxWidthWrapper from "@/components/shared/max-width-wrapper";
 import { useODB } from "@/app/context/OrbisContext";
-import { set } from "zod";
-import { get } from "http";
 
 export default function Posts() {
   const [allMessages, setAllMessages] = useState<Post[] | undefined>(undefined);
@@ -48,7 +46,6 @@ export default function Posts() {
           )
           .run();
         const queryResult = query.rows as Post[];
-        console.log(queryResult);
         if (queryResult.length) {
           setPosts(queryResult.slice(0, 10));
           setAllMessages(queryResult);
@@ -66,9 +63,6 @@ export default function Posts() {
         case "next":
           setPagination(pagination + 1);
           setPosts(allMessages?.slice(pagination * 10, pagination * 10 + 10));
-          console.log(
-            allMessages?.slice(pagination * 10, pagination * 10 + 10),
-          );
           break;
         case "previous":
           setPagination(pagination - 1);
