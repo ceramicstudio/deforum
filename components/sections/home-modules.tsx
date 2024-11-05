@@ -9,15 +9,15 @@ import { env } from "@/env.mjs";
 import { Button } from "@/components/ui/button";
 import MaxWidthWrapper from "@/components/shared/max-width-wrapper";
 import { useODB } from "@/app/context/OrbisContext";
-import { set } from "zod";
 
 const PROFILE_ID = env.NEXT_PUBLIC_PROFILE_ID ?? "";
 const CONTEXT_ID = env.NEXT_PUBLIC_CONTEXT_ID ?? "";
 
 export function HomeModules() {
   const [profile, setProfile] = useState<Profile | undefined>(undefined);
+  const [loaded, setLoaded] = useState<boolean>(false);
   const { orbis } = useODB();
-  const { address, isConnecting, isConnected } = useAccount();
+  const { isConnecting, isConnected } = useAccount();
 
   const getProfile = async (): Promise<void> => {
     try {
@@ -40,18 +40,29 @@ export function HomeModules() {
   };
 
   useEffect(() => {
-    window.addEventListener("loaded", function () {
+    const handleLoaded = () => {
       try {
-        void getProfile();
+        setLoaded(true);
       } catch (error) {
-        console.log(error);
+        console.error(error);
       }
-    });
-    void getProfile();
+    };
+
+    window.addEventListener("loaded", handleLoaded);
     return () => {
+      window.removeEventListener("loaded", handleLoaded);
       setProfile(undefined);
+      setLoaded(false);
     };
   }, []);
+
+  useEffect(() => {
+    if (loaded) {
+      (async () => {
+        await getProfile();
+      })();
+    }
+  }, [loaded]);
 
   return (
     <section className="flex flex-col items-center pt-12 text-center md:col-span-1 lg:col-span-1">
