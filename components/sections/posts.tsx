@@ -12,12 +12,14 @@ import { Icons } from "@/components/shared/icons";
 import MaxWidthWrapper from "@/components/shared/max-width-wrapper";
 import { useODB } from "@/app/context/OrbisContext";
 import { set } from "zod";
+import { get } from "http";
 
 export default function Posts() {
   const [allMessages, setAllMessages] = useState<Post[] | undefined>(undefined);
   const [posts, setPosts] = useState<Post[] | undefined>();
   const { orbis } = useODB();
   const [pagination, setPagination] = useState<number>(1);
+  const [loaded, setLoaded] = useState<boolean>(false);
 
   useAccountEffect({
     onDisconnect() {
@@ -46,6 +48,7 @@ export default function Posts() {
           )
           .run();
         const queryResult = query.rows as Post[];
+        console.log(queryResult);
         if (queryResult.length) {
           setPosts(queryResult.slice(0, 10));
           setAllMessages(queryResult);
@@ -81,20 +84,33 @@ export default function Posts() {
     }
   };
 
+  // First useEffect for setting the loaded state when the window event fires
   useEffect(() => {
-    window.addEventListener("loaded", function () {
+    const handleLoaded = () => {
       try {
-        void getPosts();
+        setLoaded(true);
       } catch (error) {
-        console.log(error);
+        console.error(error);
       }
-    });
-    void getPosts();
+    };
+
+    window.addEventListener("loaded", handleLoaded);
     return () => {
+      window.removeEventListener("loaded", handleLoaded);
       setAllMessages([]);
       setPosts([]);
+      setLoaded(false);
     };
-  }, []);
+  }, []); // Empty dependency array to run only on mount and unmount
+
+  // Second useEffect for fetching posts when 'loaded' is true
+  useEffect(() => {
+    if (loaded) {
+      (async () => {
+        await getPosts();
+      })();
+    }
+  }, [loaded]); // Dependency on 'loaded' to trigger this effect when it changes
 
   return (
     <section className="col-span-2">
