@@ -10,19 +10,18 @@ import { type Profile } from "@/types/index";
 import { Button } from "@/components/ui/button";
 import MaxWidthWrapper from "@/components/shared/max-width-wrapper";
 import { useODB } from "@/app/context/OrbisContext";
-import { set } from "zod";
 
 const PROFILE_ID = env.NEXT_PUBLIC_PROFILE_ID ?? "";
 const CONTEXT_ID = env.NEXT_PUBLIC_CONTEXT_ID ?? "";
 
 export function ProfileModules() {
   const [about, setAbout] = useState<string | undefined>(undefined);
+  const [loaded, setLoaded] = useState<boolean>(false);
   const [name, setName] = useState<string | undefined>(undefined);
   const [username, setUsername] = useState<string | undefined>(undefined);
   const [file, setFile] = useState<File | undefined>(undefined);
   const [profile, setProfile] = useState<Profile | undefined>(undefined);
   const { orbis } = useODB();
-  const { address } = useAccount();
   const { mutateAsync: upload } = useStorageUpload();
 
   useAccountEffect({
@@ -107,11 +106,32 @@ export function ProfileModules() {
     }
   };
 
+  // First useEffect for setting the loaded state when the window event fires
   useEffect(() => {
-    if (address) {
-      void getProfile();
+    const handleLoaded = () => {
+      try {
+        setLoaded(true);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    window.addEventListener("loaded", handleLoaded);
+    return () => {
+      window.removeEventListener("loaded", handleLoaded);
+      setProfile(undefined);
+      setLoaded(false);
+    };
+  }, []); // Empty dependency array to run only on mount and unmount
+
+  // Second useEffect for fetching profile when 'loaded' is true
+  useEffect(() => {
+    if (loaded) {
+      (async () => {
+        await getProfile();
+      })();
     }
-  }, [address]);
+  }, [loaded]);
 
   return (
     <section className="flex flex-col items-center pb-6 text-center">
