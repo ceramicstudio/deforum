@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 import { Toaster } from "@/components/ui/sonner";
 import { TailwindIndicator } from "@/components/tailwind-indicator";
 import { env } from "@/env.mjs";
-import { ODB } from "./context/OrbisContext";
+import { OrbisProvider } from "./context/OrbisContext";
 import { WalletProvider } from "./context/WalletContext";
 import { useState } from "react";
 
@@ -48,7 +48,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
                 activeChain="ethereum"
                 clientId={env.NEXT_PUBLIC_THIRDWEB_ID}
               >
-                <ODB>{children}</ODB>
+                <OrbisProvider>{children}</OrbisProvider>
               </ThirdwebProvider>
             </WalletProvider>
           </QueryClientProvider>

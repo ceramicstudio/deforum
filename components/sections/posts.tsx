@@ -111,7 +111,7 @@ export default function Posts() {
                     />
                     <div className="relative">
                       <div className="relative flex items-center gap-3">
-                        {post.profile?.profile_imageid && (
+                        {post.profile?.profile_imageid ? (
                           <>
                             <MediaRenderer
                               src={post.profile?.profile_imageid}
@@ -122,6 +122,20 @@ export default function Posts() {
                             <Link href={`/users/${post.profile.stream_id}`}>
                               <p className="relative text-sm font-semibold text-foreground hover:text-destructive">
                                 {post.profile.username}
+                              </p>
+                            </Link>
+                          </>
+                        ) : (
+                          <>
+                            <MediaRenderer
+                              src="/profile-icon.png"
+                              width="2rem"
+                              height="2rem"
+                              className="rounded-full"
+                            />
+                            <Link href={`/users/${post.profile?.stream_id}`}>
+                              <p className="relative text-sm font-semibold text-foreground hover:text-destructive">
+                                {post.profile?.username}
                               </p>
                             </Link>
                           </>

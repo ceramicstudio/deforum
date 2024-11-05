@@ -40,7 +40,7 @@ let isAuthenticated = false;
 
 const Context = createContext({ orbis, isAuthenticated });
 
-export const ODB = ({ children }: OrbisDBProps) => {
+export const OrbisProvider = ({ children }: OrbisDBProps) => {
   const { data: walletClient } = useWalletClient();
   const connection = useRef(false); // Persist across renders
 
