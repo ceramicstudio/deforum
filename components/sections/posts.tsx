@@ -9,6 +9,7 @@ import { formatDate } from "@/lib/utils";
 import { env } from "@/env.mjs";
 import { Button } from "@/components/ui/button";
 import { Icons } from "@/components/shared/icons";
+import { CeramicClient } from '@ceramic-sdk/http-client';
 import MaxWidthWrapper from "@/components/shared/max-width-wrapper";
 import { useODB } from "@/app/context/OrbisContext";
 
@@ -29,6 +30,8 @@ export default function Posts() {
 
   const getPosts = async (): Promise<void> => {
     try {
+      const client = new CeramicClient({url: 'http://localhost:5101'});
+      console.log(client);  
       const user = await orbis.getConnectedUser();
       if (user) {
         const query = await orbis
