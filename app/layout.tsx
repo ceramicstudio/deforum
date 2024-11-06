@@ -17,7 +17,7 @@ interface RootLayoutProps {
   children: React.ReactNode;
 }
 
-export const useQueryClient = () => {
+const useQueryClient = () => {
   const [queryClient] = useState(() => new QueryClient())
   return queryClient
 }
