@@ -10,6 +10,10 @@ const nextConfig = {
         fs: false,
       };
     }
+    if (isServer) {
+      config.externals.push('@ceramic-sdk/flight-sql-client')
+      config.externals.push('apache-arrow')
+    }
     config.externals.push("pino-pretty", "encoding");
     return config;
   },
