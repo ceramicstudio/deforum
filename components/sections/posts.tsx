@@ -9,7 +9,11 @@ import { formatDate } from "@/lib/utils";
 import { env } from "@/env.mjs";
 import { Button } from "@/components/ui/button";
 import { Icons } from "@/components/shared/icons";
-import { CeramicClient } from '@ceramic-sdk/http-client';
+import { CeramicClient } from "@ceramic-sdk/http-client";
+import { StreamID } from "@ceramic-sdk/identifiers";
+import { asDIDString } from '@didtools/codecs'
+import { getAuthenticatedDID } from '@didtools/key-did'
+import { eventFromCAR, InitEventPayload, signedEventToCAR, signEvent, eventToCAR, eventToString, decodeSignedEvent } from "@ceramic-sdk/events";
 import MaxWidthWrapper from "@/components/shared/max-width-wrapper";
 import { useODB } from "@/app/context/OrbisContext";
 
@@ -30,8 +34,47 @@ export default function Posts() {
 
   const getPosts = async (): Promise<void> => {
     try {
-      const client = new CeramicClient({url: 'http://localhost:5101'});
-      console.log(client);  
+      const client = new CeramicClient({ url: "http://localhost:5222" });
+      const v = await client.getVersion();
+      const did = await getAuthenticatedDID(new Uint8Array(32))
+      console.log(did)
+      const model = StreamID.fromString("kjzl6hvfrbw6c5he7fxl3oakeckm2kchkqboqug08inkh1tmfqpd8v3oceriml2")
+      const eventPayload: InitEventPayload = {
+        data: {
+          body: "This is a simple message",
+        },
+        header: {
+          controllers: [asDIDString(did.id)],
+          model,
+          sep: "test",
+        },
+      };
+      console.log()
+      const encodedPayload = InitEventPayload.encode(eventPayload);
+      const unsignedCar = eventToCAR(InitEventPayload, eventPayload);
+      console.log(unsignedCar)
+      const unsignedEvent = eventFromCAR(InitEventPayload, unsignedCar);
+      console.log(unsignedEvent)  
+      // Sign the event
+      const signedEvent = await signEvent(did, encodedPayload);
+      console.log(signedEvent)
+      const event2 = signedEventToCAR(signedEvent)
+      const signedEventFromCar = eventFromCAR(InitEventPayload, event2)
+      console.log(signedEventFromCar)
+      const res = await client.postEventCAR(event2)
+      console.log(res);
+      const modelId = "kjzl6hvfrbw6c5he7fxl3oakeckm2kchkqboqug08inkh1tmfqpd8v3oceriml2";
+      const register = await client.registerInterestModel(modelId);
+      const events = await client.getEventsFeed({
+        resumeAt: "101",
+      });
+      console.log(events) 
+      const event = await client.getEventCAR(events.events[99].id);
+      const fromCar = eventFromCAR(InitEventPayload, event)
+      const decoded = decodeSignedEvent(fromCar)
+      console.log(decoded)
+      console.log(fromCar)
+      console.log(event)
       const user = await orbis.getConnectedUser();
       if (user) {
         const query = await orbis
